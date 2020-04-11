@@ -63,35 +63,39 @@ for entry in json_data:
     cur.execute('''INSERT OR REPLACE INTO Member
         (user_id, course_id, role) VALUES ( ?, ?, ? )''',
         ( user_id, course_id, role ) )
-
+    
     conn.commit()
 
-"""Create Dataframe to plot enrollment per course number"""
+"""Create Dataframe to plot enrollment per course number, JOIN on Course_ID to
+show class title"""
 
 member_df = pd.read_sql_query('SELECT user_id, course_id, role FROM Member', conn)
+course_df = pd.read_sql_query('SELEcT id, title from Course', conn)
+merged_df = pd.merge(member_df[['user_id','course_id']], course_df[['id','title']], 
+                how='outer', left_on='course_id', right_on='id')
+
+
+
 
 """Check dataframe to clean if necessary"""
-print('Member dataframe info:')
-print(member_df.head())
-print(member_df.shape)
-print('Null values: ' + str(sum(member_df.isnull().sum() != 0)) + '\n')
+print('Merged dataframe info:')
+print(merged_df.head())
+print(merged_df.shape)
+print('Null values: ' + str(sum(merged_df.isnull().sum() != 0)) + '\n')
 
-course = member_df['course_id']
+course = merged_df['title']
 course = pd.Series(course).unique()
 
 def enrollment(course_index):
     """count enrollment of each class"""
     count = 0
-    for course in member_df['course_id']:
-        if course == course_index:
+    for id_number in merged_df['title']:
+        if id_number == course_index:
             count += 1
     return count
 
 #Call enrollment function into list for easy plotting
-enrollment_numbers = [enrollment(course[0]), enrollment(course[1]), enrollment(course[2]), 
-                     enrollment(course[3]), enrollment(course[4]), enrollment(course[5]),
-                     enrollment(course[6]), enrollment(course[7]), enrollment(course[8]),
-                     enrollment(course[9])]
+enrollment_numbers = [enrollment(i) for i in course]
 
 #Check course enrollment numbers against course
 if len(enrollment_numbers) == len(course):
@@ -108,6 +112,6 @@ plt.tight_layout()
 plt.bar(course, enrollment_numbers)
 plt.ylabel('Students Enrolled')
 plt.title('Enrollment by Course Number')
-plt.xlabel('Course No.')
+plt.xlabel('Course Title')
 
 plt.show()
