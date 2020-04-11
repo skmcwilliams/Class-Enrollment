@@ -15,12 +15,12 @@ DROP TABLE IF EXISTS Member;
 DROP TABLE IF EXISTS Course;
 
 CREATE TABLE User (
-    id     INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+    user_id     INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
     name   TEXT UNIQUE
 );
 
 CREATE TABLE Course (
-    id     INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+    course_id     INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
     title  TEXT UNIQUE
 );
 
@@ -52,12 +52,12 @@ for entry in json_data:
 
     cur.execute('''INSERT OR IGNORE INTO User (name)
         VALUES ( ? )''', ( name, ) )
-    cur.execute('SELECT id FROM User WHERE name = ? ', (name, ))
+    cur.execute('SELECT user_id FROM User WHERE name = ? ', (name, ))
     user_id = cur.fetchone()[0]
 
     cur.execute('''INSERT OR IGNORE INTO Course (title)
         VALUES ( ? )''', ( title, ) )
-    cur.execute('SELECT id FROM Course WHERE title = ? ', (title, ))
+    cur.execute('SELECT course_id FROM Course WHERE title = ? ', (title, ))
     course_id = cur.fetchone()[0]
 
     cur.execute('''INSERT OR REPLACE INTO Member
@@ -70,9 +70,9 @@ for entry in json_data:
 show class title"""
 
 member_df = pd.read_sql_query('SELECT user_id, course_id, role FROM Member', conn)
-course_df = pd.read_sql_query('SELEcT id, title from Course', conn)
-merged_df = pd.merge(member_df[['user_id','course_id']], course_df[['id','title']], 
-                how='outer', left_on='course_id', right_on='id')
+course_df = pd.read_sql_query('SELECT course_id, title from Course', conn)
+merged_df = pd.merge(member_df[['user_id','course_id']], course_df[['course_id','title']], 
+                how='inner', on='course_id')
 
 
 
