@@ -71,10 +71,8 @@ show class title"""
 
 member_df = pd.read_sql_query('SELECT user_id, course_id, role FROM Member', conn)
 course_df = pd.read_sql_query('SELECT course_id, title from Course', conn)
-merged_df = pd.merge(member_df[['user_id','course_id']], course_df[['course_id','title']], 
+merged_df = pd.merge(member_df[['user_id','role','course_id']], course_df[['course_id','title']], 
                 how='inner', on='course_id')
-
-
 
 
 """Check dataframe to clean if necessary"""
@@ -83,8 +81,6 @@ print(merged_df.head())
 print(merged_df.shape)
 print('Null values: ' + str(sum(merged_df.isnull().sum() != 0)) + '\n')
 
-course = merged_df['title']
-course = pd.Series(course).unique()
 
 def enrollment(course_index):
     """count enrollment of each class"""
@@ -92,9 +88,12 @@ def enrollment(course_index):
     for id_number in merged_df['title']:
         if id_number == course_index:
             count += 1
-    return count
+    return count - 1 #account for teacher in each class
+
 
 #Call enrollment function into list for easy plotting
+course = merged_df['title']
+course = pd.Series(course).unique()
 enrollment_numbers = [enrollment(i) for i in course]
 
 #Check course enrollment numbers against course
