@@ -44,8 +44,8 @@ json_data = json.loads(str_data)
 
 for entry in json_data:
 
-    name = entry[0];
-    title = entry[1];
+    name = entry[0]
+    title = entry[1]
     role = entry[2]
 
     #print(name, title, role)
@@ -80,6 +80,8 @@ merged_df = pd.merge(member_df[['user_id','role','course_id']], course_df[['cour
 print('\n Merged dataframe info:')
 print(merged_df.head())
 print(merged_df.shape)
+if merged_df.shape[0] != member_df.shape[0]:
+    print('Missing Data')
 print('Null values: ' + str(sum(merged_df.isnull().sum() != 0)) + '\n')
 print('Number of Teachers: ' + str(np.sum(merged_df['role'])))
 
