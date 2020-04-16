@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 conn = sqlite3.connect('rosterdb.sqlite')
 cur = conn.cursor()
 
-#Table Setup
+# Table Setup
 cur.executescript('''
 DROP TABLE IF EXISTS User;
 DROP TABLE IF EXISTS Member;
@@ -69,6 +69,7 @@ for entry in json_data:
 """Create Dataframe to plot enrollment per course number, JOIN on Course_ID to
 show class title"""
 
+
 member_df = pd.read_sql_query('SELECT user_id, course_id, role FROM Member', conn)
 course_df = pd.read_sql_query('SELECT course_id, title from Course', conn)
 merged_df = pd.merge(member_df[['user_id','role','course_id']], course_df[['course_id','title']], 
@@ -76,10 +77,11 @@ merged_df = pd.merge(member_df[['user_id','role','course_id']], course_df[['cour
 
 
 """Check dataframe to clean if necessary"""
-print('Merged dataframe info:')
+print('\n Merged dataframe info:')
 print(merged_df.head())
 print(merged_df.shape)
 print('Null values: ' + str(sum(merged_df.isnull().sum() != 0)) + '\n')
+print('Number of Teachers: ' + str(np.sum(merged_df['role'])))
 
 
 def enrollment(course_index):
@@ -88,25 +90,25 @@ def enrollment(course_index):
     for id_number in merged_df['title']:
         if id_number == course_index:
             count += 1
-    return count - 1 #account for teacher in each class
+    return count - 1  # account for teacher in each class
 
 
-#Call enrollment function into list for easy plotting
+# Call enrollment function into list for easy plotting
 course = merged_df['title']
 course = pd.Series(course).unique()
 enrollment_numbers = [enrollment(i) for i in course]
 
-#Check course enrollment numbers against course
+# Check course enrollment numbers against course
 if len(enrollment_numbers) == len(course):
     print(True)
 else:
     print(False)
 
-#Convert integers to strings to allow for clear plotting of data
-course = list(map(str,course))
+# Convert integers to strings to allow for clear plotting of data
+course = list(map(str, course))
 
-#make plot
-plt.figure(figsize = (10,7))
+# make plot
+plt.figure(figsize = (10, 7))
 plt.tight_layout()
 plt.bar(course, enrollment_numbers)
 plt.ylabel('Students Enrolled')
